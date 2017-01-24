@@ -17,26 +17,16 @@
 		pluginPathCore: 'core',
 
 		corePlugins: {
+			config: {},
+		},
+
+		plugins: {
 			url: {
 				parameters: {
 					pages: 'page',
 				}
-			},
-			style: {},
-			config: {},
-			toolbar: {},
-			bookflip: {},
-			pagination: {},
-			contextmenu: {},
-			page: {},
-			edit: {}
-		},
-
-		plugins: {
-			share: {},
-			zoomable: {},
-			fullscreen: {},
-			media: {}
+			}
+			
 		},
 	};
 	
