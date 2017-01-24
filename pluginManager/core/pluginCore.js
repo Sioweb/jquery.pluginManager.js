@@ -69,7 +69,7 @@
 					.load({
 						defer: true,
 						source: selfObj.source+selfObj.pluginPathCore,
-						plugins: selfObj.corePlugins,
+ 						plugins: selfObj.corePlugins,
 						done: function(managerObj) {
 							managerObj.load({
 								source: selfObj.source+selfObj.pluginPath,
