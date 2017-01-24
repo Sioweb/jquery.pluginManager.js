@@ -112,7 +112,7 @@
 					var newOptions = new Object(pluginClass.initOptions);
 
 					/* Space to reset some standart options */
-
+ 
 					/***/
 
 					if(settings)
