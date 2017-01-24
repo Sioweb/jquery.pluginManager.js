@@ -14,7 +14,7 @@
     isHtml: false,
 
     source: '',
-    prefix: 'pdf_',
+    prefix: 'pm_',
     plugins: {},
     pluginLoaded: function() {},
     allPluginsLoaded: function() {},
