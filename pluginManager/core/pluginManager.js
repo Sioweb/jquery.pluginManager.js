@@ -2,19 +2,12 @@
 
   "use strict";
 
-  var pluginName = 'pluginManager',
-      PluginClass;
-
+  var pluginName = 'pluginManager';
 
   /* Enter PluginOptions */
   $[pluginName+'Default'] = {
-    debug: true,
-    enabled: true,
-    container: window,
-    isHtml: false,
-
     source: '',
-    prefix: 'pm_',
+    prefix: 'pdf_',
     plugins: {},
     pluginLoaded: function() {},
     allPluginsLoaded: function() {},
@@ -22,6 +15,7 @@
     internalEvents: {
       init: [],
       redraw: [],
+      page_init: [],
       pre_redraw: [],
       start_redraw: [],
       pluginsLoaded: [],
@@ -32,36 +26,15 @@
     },
   };
   
-
-  PluginClass = function() {
-
+  $.pluginCoreDefault.head($,pluginName,function() {
     var selfObj = this,
         rootObj;
-    this.item = false;
+
     this.initOptions = new Object($[pluginName+'Default']);
     
     this.init = function(elem) {
       selfObj = this;
       rootObj = $.extend(true,{},selfObj,selfObj.rootObj);
-
-      if(!this.container)
-        this.container = window;
-      this.elem = elem;
-      this.item = $(this.elem);
-      this.container = $(this.container);
-      this.isHTML = selfObj.elem.tagName.toLowerCase() === 'html';
-    };
-
-    this.disable = function() {
-      selfObj.enabled = false;
-    };
-
-    this.enable = function() {
-      selfObj.enabled = true;
-    };
-
-    this.loaded = function() {
-
     };
 
     this.registrateNewEvent = function(data) {
@@ -71,13 +44,22 @@
     this.registrateEvent = function(data) {
       var events = data.event.split(',');
 
+      data.skip = false; // standard skip-Wert damit in this.fire keine Konflikte entstehen
       for(var e in events) {
         if(selfObj.internalEvents[events[e]] !== undefined) {
-          selfObj.internalEvents[events[e]][selfObj.internalEvents[events[e]].length] = data.callback;
+          if(data.index === undefined)
+            selfObj.internalEvents[events[e]][selfObj.internalEvents[events[e]].length] = data;
+          else selfObj.internalEvents[events[e]].splice(data.index, 0, data);
         }
       }
     };
 
+    /**
+     * Event-Optionen
+     * - timeout: true||integer; so lange kann das Event nicht ausgeführt werden
+     * - callback: function()
+     * - options: object()
+     */
     this.fire = function(runEvents) {
       var options = arguments[1]||{},
           e = arguments[2]||{},
@@ -86,14 +68,29 @@
       options = $.extend({},true,options,{});
 
       options = $.extend({},true,options,{
+        event: '',
         padding: selfObj.padding,
         offset: $.extend(selfObj.bgSize,{x:selfObj.offsetLeft,y:selfObj.offsetTop}),
       });
 
       for(var eKey in runEvents) {
         if(selfObj.internalEvents[runEvents[eKey]] !== undefined) {
-          $.each(selfObj.internalEvents[runEvents[eKey]],function(internEvent,callback) {
-            callback(options,e);
+          options.event = runEvents[eKey];
+          $.each(selfObj.internalEvents[runEvents[eKey]],function(internEvent,eventData) {
+            if(!eventData.skip && eventData.timeout !== undefined && eventData.timeout) {
+              var timeout = eventData.timeout;
+              if(typeof timeout === 'boolean')
+                timeout = 1000;
+
+              if(!eventData.skip)
+                eventData.callback(options,e);
+
+              eventData.skip = true;
+              setTimeout(function() {
+                eventData.skip = false;
+              },timeout);
+
+            } else eventData.callback(options,e);
           });
         }
       }
@@ -104,7 +101,20 @@
       if(selfObj.plugins[plugin] !== undefined) {
         return selfObj.plugins[plugin];
       }
-    }
+    };
+
+    this.promiseCallback = function(promiseCallback,obj) {
+      if(typeof promiseCallback !== 'object' || promiseCallback.length !== 2) {
+        console.log('Promise requires two args with a functions and options: [function(){},[args]]');
+        return false;
+      }
+      promiseCallback[0](promiseCallback[1],obj);
+    };
+
+    this.before = function(callback) {
+      callback(selfObj);
+      return this;
+    };
 
     this.load = function() {
       var data = arguments[0]||{},
@@ -125,6 +135,7 @@
 
       var loadPlugin = function(plugin,options,data) {
         var loadNext = arguments[3]||false;
+        
         $.getScript(data.source+'/'+selfObj.prefix+plugin+'.js',function() {
           pluginIndex++;
           options.selector = '#'+rootObj.elem.id+' .'+plugin;
@@ -141,8 +152,13 @@
           if(loadNext) {
             var nextPlugin = Object.keys(data.plugins)[0];
             if(nextPlugin !== undefined) {
-              loadPlugin(nextPlugin,data.plugins[Object.keys(data.plugins)[0]],data,true);
-              delete data.plugins[Object.keys(data.plugins)[0]];
+              if(selfObj.plugins[plugin].promise === undefined) {
+                loadPlugin(nextPlugin,data.plugins[Object.keys(data.plugins)[0]],data,true);
+                delete data.plugins[Object.keys(data.plugins)[0]];
+              } else selfObj.plugins[plugin].promise(function(args,pluginObj) {
+                loadPlugin.apply(this,args);
+                delete data.plugins[Object.keys(data.plugins)[0]];
+              },[nextPlugin,data.plugins[Object.keys(data.plugins)[0]],data,true])
             }
           }
 
@@ -154,6 +170,8 @@
               countPlugins:countPlugins
             });
           }
+        }).fail(function(jqxhr, settings, exception) {
+          // console.log('FAIL',jqxhr, settings, exception);
         });
       };
 
@@ -171,57 +189,5 @@
 
       return this;
     };
-  };
-
-  $[pluginName] = $.fn[pluginName] = function(settings) {
-    var element = typeof this === 'function'?$('html'):this,
-        newData = arguments[1]||{},
-        returnElement = [];
-        
-    returnElement[0] = element.each(function(k,i) {
-      var pluginClass = $.data(this, pluginName);
-
-      if(!settings || typeof settings === 'object' || settings === 'init') {
-
-        if(!pluginClass) {
-          if(settings === 'init')
-            settings = arguments[1] || {};
-          pluginClass = new PluginClass();
-
-          var newOptions = new Object(pluginClass.initOptions);
-
-          /* Space to reset some standart options */
-
-          /***/
-
-          if(settings)
-            newOptions = $.extend(true,{},newOptions,settings);
-          pluginClass = $.extend(newOptions,pluginClass);
-          /** Initialisieren. */
-          this[pluginName] = pluginClass;
-          pluginClass.init(this);
-          if(element.prop('tagName').toLowerCase() !== 'html') {
-            $.data(this, pluginName, pluginClass);
-          } else returnElement[1] = pluginClass;
-        } else {
-          pluginClass.init(this,1);
-          if(element.prop('tagName').toLowerCase() !== 'html') {
-            $.data(this, pluginName, pluginClass);
-          } else returnElement[1] = pluginClass;
-        }
-      } else if(!pluginClass) {
-        return;
-      } else if(pluginClass[settings]) {
-        var method = settings;
-        returnElement[1] = pluginClass[method](newData);
-      } else {
-        return;
-      }
-    });
-
-    if(returnElement[1] !== undefined) return returnElement[1];
-      return returnElement[0];
-
-  };
-  
+  });
 })(jQuery);
