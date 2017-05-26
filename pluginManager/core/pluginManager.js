@@ -7,7 +7,7 @@
   /* Enter PluginOptions */
   $[pluginName+'Default'] = {
     source: '',
-    prefix: 'pdf_',
+    prefix: 'pm_',
     plugins: {},
     pluginLoaded: function() {},
     allPluginsLoaded: function() {},
