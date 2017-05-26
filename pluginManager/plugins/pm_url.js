@@ -2,58 +2,49 @@
 
   "use strict";
 
-  var pluginName = 'pm_url',
-      PluginClass;
-
+  var pluginName = 'pm_url';
 
   /* Enter PluginOptions */
   $[pluginName+'Default'] = {
-    debug: true,
-    enabled: true,
-    container: window,
-    isHtml: false,
-
     parameters: {}
   };
   
+  $.viewerDefault.head($,pluginName,function() {
 
-  PluginClass = function() {
-
-    var selfObj = this;
-    this.item = false;
+    var selfObj = this,
+        rootObj;
     this.initOptions = new Object($[pluginName+'Default']);
     
     this.init = function(elem) {
       selfObj = this;
-
-      if(!this.container)
-        this.container = window;
-      this.elem = elem;
-      this.item = $(this.elem);
-      this.container = $(this.container);
-      this.isHTML = selfObj.elem.tagName.toLowerCase() === 'html';
-
-      this.loaded();
+      rootObj = selfObj.rootObj;
     };
 
-    this.disable = function() {
-      selfObj.enabled = false;
+    this.setParameter = function(param,value) {
+      var paramValue = selfObj.get(param),
+          location = window.location.href,
+          regex = new RegExp(param+'=[^&]*'),
+          newURL = location.replace(regex,param+'='+value);
+
+      if(newURL.indexOf(param+'=') === -1)
+        newURL += (newURL.indexOf('?') === -1?'?':'')+param+'='+value;
+
+      history.pushState({}, "", newURL);
     };
 
-    this.enable = function() {
-      selfObj.enabled = true;
+    this.setParameters = function(data) {};
+
+    this.setUrl = function() {};
+
+    this.getParameterByName = function(name, url) {
+      return selfObj.get(name, url);
     };
-
-    this.loaded = function() {
-    };
-
-
 
     /**
      * Get URL-Parameter
-     * Bsp.: Get page number with ?page=1 würde 1 zurückgeben
+     * Bsp.: Seiten-Zahl mit ?page=1 würde 1 zurückgeben
      */
-    this.getParameterByName = function(name, url) {
+    this.get = function(name, url) {
       if(!url) url = window.location.href;
         name = name.replace(/[\[\]]/g, "\\$&");
       
@@ -63,63 +54,6 @@
       if (!results[2]) return '';
       return decodeURIComponent(results[2].replace(/\+/g, " "));
     };
-
-
-  };
-
-  $[pluginName] = $.fn[pluginName] = function(settings) {
-    var element = typeof this === 'function'?$('html'):this,
-        newData = arguments[1]||{},
-        returnElement = [];
-        
-    returnElement[0] = element.each(function(k,i) {
-      var pluginClass = $.data(this, pluginName);
-
-      if(!settings || typeof settings === 'object' || settings === 'init') {
-
-        if(!pluginClass) {
-          if(settings === 'init')
-            settings = arguments[1] || {};
-          pluginClass = new PluginClass();
-
-          var newOptions = new Object(pluginClass.initOptions);
-
-          /* Space to reset some standart options */
-
-          /***/
-
-          if(settings)
-            newOptions = $.extend(true,{},newOptions,settings);
-          pluginClass = $.extend(newOptions,pluginClass);
-          /** Initialisieren. */
-          this[pluginName] = pluginClass;
-          pluginClass.init(this);
-          if(element.prop('tagName').toLowerCase() !== 'html') {
-            $.data(this, pluginName, pluginClass);
-          } else {
-            returnElement[1] = pluginClass;
-          }
-        } else {
-          pluginClass.init(this,1);
-          if(element.prop('tagName').toLowerCase() !== 'html') {
-            $.data(this, pluginName, pluginClass);
-          } else {
-            returnElement[1] = pluginClass;
-          }
-        }
-      } else if(!pluginClass) {
-        return;
-      } else if(pluginClass[settings]) {
-        var method = settings;
-        returnElement[1] = pluginClass[method](newData);
-      } else {
-        return;
-      }
-    });
-
-    if(returnElement[1] !== undefined) return returnElement[1];
-      return returnElement[0];
-
-  };
+  });
   
 })(jQuery);
