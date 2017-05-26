@@ -16,9 +16,8 @@
 		options: {},
 		prefix: 'pm_',
 	};
-	
 
-	PluginClass = function() {
+  $.viewerDefault.head($,pluginName,function() {
 
 		var selfObj = this,
 				rootObj,style;
@@ -87,57 +86,6 @@
 		};
 
 		this.loaded = function() {};
-	};
-
-  $[pluginName] = $.fn[pluginName] = function(settings) {
-    var element = typeof this === 'function'?$('html'):this,
-        newData = arguments[1]||{},
-        returnElement = [];
-        
-    returnElement[0] = element.each(function(k,i) {
-      var pluginClass = $.data(this, pluginName);
-
-      if(!settings || typeof settings === 'object' || settings === 'init') {
-
-        if(!pluginClass) {
-          if(settings === 'init')
-            settings = arguments[1] || {};
-          pluginClass = new PluginClass();
-
-          var newOptions = new Object(pluginClass.initOptions);
-
-          /* Space to reset some standart options */
-
-          /***/
-
-          if(settings)
-            newOptions = $.extend(true,{},newOptions,settings);
-          pluginClass = $.extend(newOptions,pluginClass);
-          /** Initialisieren. */
-          this[pluginName] = pluginClass;
-          pluginClass.init(this);
-          if(element.prop('tagName').toLowerCase() !== 'html') {
-            $.data(this, pluginName, pluginClass);
-          } else returnElement[1] = pluginClass;
-        } else {
-          pluginClass.init(this,1);
-          if(element.prop('tagName').toLowerCase() !== 'html') {
-            $.data(this, pluginName, pluginClass);
-          } else returnElement[1] = pluginClass;
-        }
-      } else if(!pluginClass) {
-        return;
-      } else if(pluginClass[settings]) {
-        var method = settings;
-        returnElement[1] = pluginClass[method](newData);
-      } else {
-        return;
-      }
-    });
-
-    if(returnElement[1] !== undefined) return returnElement[1];
-      return returnElement[0];
-
-  };
+	});
   
 })(jQuery);
