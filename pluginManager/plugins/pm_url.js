@@ -9,7 +9,7 @@
     parameters: {}
   };
   
-  $.viewerDefault.head($,pluginName,function() {
+  $.pluginCoreDefault.head($,pluginName,function() {
 
     var selfObj = this,
         rootObj;
