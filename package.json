@@ -1,0 +1,40 @@
+{
+  "name": "sioweb-select",
+  "version": "1.0.0",
+  "main": "dist/jquery.select.min.js",
+  "homepage": "https://github.com/Sioweb/jquery.select.js#readme",
+  "author": "Sascha Weidner <support@sioweb.de>",
+  "description": "",
+  "keywords": [
+    "jquery",
+    "plugins"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "package.json"
+  ],
+  "dependencies": {
+    "jquery": "*"
+  },
+  "devDependencies": {
+    "grunt": "^1.0.1",
+    "grunt-cli": "1.2.0",
+    "grunt-contrib-cssmin": "^2.0.0",
+    "grunt-contrib-uglify": "1.0.1"
+  },
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "build": "npm install && grunt",
+    "start": "grunt watch",
+    "test": "grunt && grunt test:slow"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sioweb/jquery.pluginManager.js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Sioweb/jquery.pluginManager.js/issues"
+  }
+}

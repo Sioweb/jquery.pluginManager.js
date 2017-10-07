@@ -1,0 +1,24 @@
+{
+  "name": "jquery.pluginManager.js",
+  "homepage": "https://github.com/Sioweb/jqueryPluginManager",
+  "description": "",
+  "main": "",
+  "keywords": [
+    "jquery",
+    "plugins"
+  ],
+  "authors": [
+    "Sascha Weidner <support@sioweb.de>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "^3.2.1"
+  }
+}
