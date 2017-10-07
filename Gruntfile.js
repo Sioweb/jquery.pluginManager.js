@@ -10,10 +10,7 @@ module.exports = function(grunt) {
 					expand: true,
 					cwd: 'src',
 					src: ['**/*.js','!*.min.js'],
-					dest: 'dist',
-      		rename: function (dst, src) {
-      			return dst +'/'+ src.replace('.js','.min.js');
-      		}
+					dest: 'dist'
 				}]
 			}
 		},
@@ -23,10 +20,7 @@ module.exports = function(grunt) {
 					expand: true,
 					cwd: 'src',
 					src: ['*.css','!*.min.css'],
-					dest: 'dist',
-      		rename: function (dst, src) {
-      			return dst +'/'+ src.replace('.css','.min.css');
-      		}
+					dest: 'dist'
 				}]
 			}
 		}
