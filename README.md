@@ -25,6 +25,7 @@ jquery_plugin_manager(function(source,responseData){
     /* Some Settings you can define later in the core itself */
   });
 });
+```
 
 ## Architecture
 
