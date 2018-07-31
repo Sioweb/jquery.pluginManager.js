@@ -1,91 +1,114 @@
-(function($){
+(function ($) {
 
 	"use strict";
 
-	var pluginName = 'pm_config',
-			PluginClass;
-
-
-	/* Enter PluginOptions */
-	$[pluginName+'Default'] = {
-		enabled: true,
-		container: window,
-		isHtml: false,
-
-		extend: false,
+	$.coreDefault.head($, 'config', {
 		options: {},
-		prefix: 'pm_',
-	};
+		useStorage: false
+	}, function (core, coreObj, handler) {
+		var selfObj = this;
 
-  $.pluginCoreDefault.head($,pluginName,function() {
-
-		var selfObj = this,
-				rootObj,style;
-				
-		this.initOptions = new Object($[pluginName+'Default']);
-
-		this.item = false;
-		this.ctx  = null;
-
-		this.init = function(elem) {
-			selfObj = this;
-			rootObj = selfObj.rootObj;
-			style = rootObj.plugin('style');
-
-			if(!this.container)
-				this.container = window;
-			this.elem = elem;
-			this.item = $(this.elem);
-			this.container = $(this.container);
-			this.isHTML = selfObj.item[0].tagName.toLowerCase() === 'html';
-
-			this.loaded();
-		};
-
-		this.disable = function() {
-			selfObj.enabled = false;
-		};
-
-		this.enable = function() {
-			selfObj.enabled = true;
-		};
-
-		this.get = function(data) {
+		this.init = function () {
 			var config = {};
+			selfObj = this;
 
-			if(typeof data.options === 'object') {
-				for(var o in options) {
-					if(selfObj.options[selfObj.prefix+o] !== undefined) {
-						config[selfObj.prefix+o] = selfObj.options[selfObj.prefix+o];
-					} else {
-						config[selfObj.prefix+o] = localStorage.getItem(selfObj.prefix+o);
-						if(config[selfObj.prefix+o] !== null)
-							config[selfObj.prefix+o] = JSON.parse(data.options[selfObj.prefix+o]);
+			selfObj.container = coreObj.prefixed(coreObj.title);
+
+            coreObj.registrateNewEvent({
+                events: {
+                    setConfig: {}
+                }
+            });
+			
+			config = coreObj.item.data(coreObj.name);
+			if (selfObj.storage() === null) {
+				selfObj.options = selfObj.storage(JSON.stringify(selfObj.options));
+			} else {
+				selfObj.options = selfObj.storage();
+			}
+
+			if(typeof config === 'object') {
+				selfObj.options = $.extend(true, {}, config, selfObj.options);
+			}
+		};
+
+		this.ready = function() {
+			var Template;
+			if(Object.keys(selfObj.get('configStorage')).length) {
+				Template = '<input name="'+selfObj.get('configStorage')+'" value=\''+JSON.stringify(selfObj.get())+'\'>';
+				core(handler.add('configStorage', $(Template).appendTo(coreObj.item))).data('config-storage','');
+			}
+		};
+
+		this.get = function () {
+			var data = arguments[0]||null,
+				config = {};
+
+			if(data === null) {
+				return selfObj.options;
+			}
+
+			
+			if (typeof data.options === 'object') {
+				for (var o in options) {
+					if (selfObj.options[o] !== undefined) {
+						config[o] = selfObj.options[o];
 					}
 				}
 			} else {
-				if(selfObj.options[selfObj.prefix+data] !== undefined) {
-					config = selfObj.options[selfObj.prefix+data];
-				} else {
-					config = localStorage.getItem(selfObj.prefix+data);
-					if(config !== null)
-						config = JSON.parse(config);
+				if (selfObj.options[data] !== undefined) {
+					config = selfObj.options[data];
 				}
 			}
-			
+
 			return config;
 		};
 
-		this.set = function(data) {
-			if(Object.keys(data).length) {
-				for(var o in data) {
-					localStorage.setItem(selfObj.prefix+o, JSON.stringify(data[o]));
-					selfObj.options[selfObj.prefix+o] = data[o];
+		this.set = function (data) {
+			if (Object.keys(data).length) {
+				for (var o in data) {
+					selfObj.options[o] = data[o];
 				}
+				selfObj.storage(selfObj.options);
+
+				if(handler.get('configStorage') !== false) {
+					handler.get('configStorage').attr('value',JSON.stringify(selfObj.get()));
+				}
+
+				coreObj.fire('setConfig',{
+					data: data,
+					config: selfObj.options,
+					plugin: selfObj
+				})
 			}
 		};
 
-		this.loaded = function() {};
+		this.storage = function () {
+			var value = arguments[0] || null,
+				data = null,
+				evenIfNull = arguments[1] || false;
+
+			if(!selfObj.useStorage) {
+				return selfObj.options;
+			}
+
+			if (value !== null || evenIfNull) {
+				localStorage.setItem(selfObj.container, JSON.stringify(value));
+				if(handler.get('configStorage') !== false) {
+					handler.get('configStorage').attr('value',JSON.stringify(selfObj.get()));
+				}
+			}
+
+			data = localStorage.getItem(selfObj.container);
+			if (data !== null) {
+				data = JSON.parse(data);
+				if(data === '{}') {
+					return {};
+				}
+				return data;
+			}
+			return null;
+		};
 	});
-  
+
 })(jQuery);

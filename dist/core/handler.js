@@ -1,0 +1,2 @@
+/*! sioweb-select 2018-07-31 */
+!function(a){"use strict";a.coreDefault.head(a,"handler",{handler:{}},function(a){var b=this;this.init=function(){b=this},this.registrate=function(){for(var a in arguments)b.handler[arguments[a]]={}},this.get=function(a){return!(void 0===b.handler["$"+a]&&!b.set(a))&&b.handler["$"+a]},this.set=function(c){var d=arguments[1]||b.handler[c];if(void 0!==b.handler[c]&&(b.handler["$"+c]=a.container.find(d),b.handler["$"+c].length))return!0},this.add=function(a,c){return b.handler["$"+a]=c,b.get(a)}})}(jQuery);

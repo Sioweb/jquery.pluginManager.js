@@ -1,0 +1,2 @@
+/*! sioweb-select 2018-07-31 */
+!function(a){"use strict";a.coreDefault.head(a,"frontend",{options:{},customerNumber:/^[0-9]{6}$/},function(a,b,c,d){var e=this;this.init=function(){e=this},this.ready=function(){}})}(jQuery);

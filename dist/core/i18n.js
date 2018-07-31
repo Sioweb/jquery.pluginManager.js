@@ -1,0 +1,2 @@
+/*! sioweb-select 2018-07-31 */
+!function(a){"use strict";a.coreDefault.head(a,"i18n",{language:{}},function(b){var c=this;this.init=function(){c=this},this.get=function(){var b=a.extend(!0,{},c.language);for(var d in arguments){if(void 0===b[arguments[d]])return"";b="function"==typeof b[arguments[d]]?b[arguments[d]]():b[arguments[d]]}return b}})}(jQuery);
